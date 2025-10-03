@@ -1,7 +1,7 @@
 {
   "name": "Jurosoda Loan Calculator",
   "short_name": "LoanCalc",
-  "start_url": "loan.html",
+  "start_url": "/jurosoda-loan-app/index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#333333",
