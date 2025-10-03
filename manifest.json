@@ -1,10 +1,12 @@
 {
   "name": "Jurosoda Loan Calculator",
-  "short_name": "LoanCalc",
+  "short_name": "Jurosoda Loan",
   "start_url": "/jurosoda-loan-app/index.html",
+  "scope": "/jurosoda-loan-app/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#333333",
+  "theme_color": "#3498db",
+  "description": "A simple calculator for Jurosoda members to check loan eligibility and repayment terms.",
   "icons": [
     {
       "src": "icon.png",
