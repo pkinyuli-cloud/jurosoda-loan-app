@@ -1,70 +1,149 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jurosoda Loan Calculator</title>
-  <link rel="manifest" href="manifest.json">
   <style>
-    body { font-family: Arial, sans-serif; margin: 40px; background: #f9f9f9; }
-    h1 { text-align: center; color: #333; }
-    .box { max-width: 500px; margin: auto; background: #fff; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
-    label { display:block; margin-top:10px; font-weight:bold; }
-    input { width: 100%; padding: 8px; margin-top: 5px; }
-    button { width: 100%; padding: 10px; margin-top: 15px; background: #333; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
-    button:hover { background: #555; }
-    .result { margin-top: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #f1f1f1; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+      padding: 20px;
+      text-align: center;
+    }
+    .container {
+      max-width: 420px;
+      margin: auto;
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #2b6cb0;
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      text-align: left;
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      background-color: #2b6cb0;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #244f8f;
+    }
+    .result {
+      margin-top: 20px;
+      background-color: #f0f8ff;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: left;
+    }
   </style>
 </head>
 <body>
-  <h1>Jurosoda Loan Calculator</h1>
-  <div class="box">
-    <label>Member Shares (Savings):</label>
-    <input id="shares" type="number" placeholder="e.g. 50000">
+  <div class="container">
+    <h1>Jurosoda Loan Calculator</h1>
 
-    <label>Months (max 12):</label>
-    <input id="months" type="number" min="1" max="12" placeholder="e.g. 6">
+    <label>Select Input Type:</label>
+    <label><input type="radio" name="mode" value="shares" checked> Based on Shares</label>
+    <label><input type="radio" name="mode" value="loan"> Enter Loan Amount</label>
 
-    <button onclick="calculate()">Calculate</button>
-
-    <div id="resultBox" class="result" style="display:none;">
-      <p id="loanAmount"></p>
-      <p id="processingFee"></p>
-      <p id="interest"></p>
-      <p id="disbursed"></p>
-      <p id="totalRepayable"></p>
-      <p id="monthlyPayment"></p>
+    <div id="sharesInput">
+      <label for="shares">Total Member Shares (Ksh):</label>
+      <input type="number" id="shares" placeholder="Enter member shares">
     </div>
+
+    <div id="loanInput" style="display:none;">
+      <label for="loanAmount">Desired Loan Amount (Ksh):</label>
+      <input type="number" id="loanAmount" placeholder="Enter desired loan amount">
+    </div>
+
+    <label for="months">Payment Period (Months):</label>
+    <select id="months">
+      <option value="3">3</option>
+      <option value="6">6</option>
+      <option value="9">9</option>
+      <option value="12" selected>12</option>
+    </select>
+
+    <button onclick="calculateLoan()">Calculate</button>
+
+    <div id="result" class="result"></div>
   </div>
 
   <script>
-    function calculate() {
-      let shares = parseFloat(document.getElementById('shares').value);
-      let months = parseInt(document.getElementById('months').value);
+    const modeRadios = document.querySelectorAll('input[name="mode"]');
+    const sharesDiv = document.getElementById('sharesInput');
+    const loanDiv = document.getElementById('loanInput');
 
-      if (isNaN(shares) || isNaN(months) || months < 1 || months > 12) {
-        alert("Please enter valid shares and months (1–12).");
+    modeRadios.forEach(radio => {
+      radio.addEventListener('change', () => {
+        if (radio.value === 'shares') {
+          sharesDiv.style.display = 'block';
+          loanDiv.style.display = 'none';
+        } else {
+          sharesDiv.style.display = 'none';
+          loanDiv.style.display = 'block';
+        }
+      });
+    });
+
+    function calculateLoan() {
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+      const months = parseInt(document.getElementById('months').value);
+      let shares = parseFloat(document.getElementById('shares').value) || 0;
+      let loan = parseFloat(document.getElementById('loanAmount').value) || 0;
+
+      if (mode === 'shares') {
+        loan = shares * 3;
+      } else {
+        if (loan === 0) {
+          alert("Please enter a valid loan amount.");
+          return;
+        }
+        if (shares > 0 && loan > shares * 3) {
+          alert("Loan amount exceeds 3× member’s shares. Please reduce it.");
+          return;
+        }
+      }
+
+      if (loan <= 0) {
+        alert("Please provide shares or loan amount.");
         return;
       }
 
-      let loan = shares * 3;
-      let fee = loan * 0.02;
-      let interest = loan * 0.01 * months;
-      let disbursed = loan - (fee + interest);
-      let total = loan;
-      let monthly = total / months;
+      const processingFee = loan * 0.02;
+      const totalInterest = loan * 0.01 * months;
+      const totalPayable = loan + totalInterest;
+      const monthlyPayment = totalPayable / months;
+      const amountDisbursed = loan - processingFee - totalInterest;
 
-      document.getElementById('resultBox').style.display = "block";
-      document.getElementById('loanAmount').innerText = "Eligible Loan Amount (3x shares): " + loan.toFixed(2);
-      document.getElementById('processingFee').innerText = "Processing Fee (2% Upfront): " + fee.toFixed(2);
-      document.getElementById('interest').innerText = "Total Interest (1% PM): " + interest.toFixed(2);
-      document.getElementById('disbursed').innerText = "Net Amount Disbursed: " + disbursed.toFixed(2);
-      document.getElementById('totalRepayable').innerText = "Total Repayable: " + total.toFixed(2);
-      document.getElementById('monthlyPayment').innerText = "Monthly Payment: " + monthly.toFixed(2);
-    }
-
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(() => console.log("Service Worker registered!"));
+      document.getElementById('result').innerHTML = `
+        <h3>Loan Calculation Summary</h3>
+        <p><strong>Loan Amount:</strong> Ksh ${loan.toFixed(2)}</p>
+        <p><strong>Processing Fee (2%):</strong> Ksh ${processingFee.toFixed(2)}</p>
+        <p><strong>Total Interest (1% × ${months} months):</strong> Ksh ${totalInterest.toFixed(2)}</p>
+        <p><strong>Total Payable:</strong> Ksh ${totalPayable.toFixed(2)}</p>
+        <p><strong>Monthly Payment:</strong> Ksh ${monthlyPayment.toFixed(2)}</p>
+        <p><strong>Amount Disbursed:</strong> Ksh ${amountDisbursed.toFixed(2)}</p>
+      `;
     }
   </script>
 </body>
