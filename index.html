@@ -61,9 +61,11 @@
   <div class="container">
     <h1>Jurosoda Loan Calculator</h1>
 
-    <label>Select Input Type:</label>
-    <label><input type="radio" name="mode" value="shares" checked> Based on Shares</label>
-    <label><input type="radio" name="mode" value="loan"> Enter Loan Amount</label>
+    <label for="mode">Select Input Type:</label>
+    <select id="mode" onchange="toggleMode()">
+      <option value="shares" selected>Based on Shares</option>
+      <option value="loan">Enter Specific Loan Amount</option>
+    </select>
 
     <div id="sharesInput">
       <label for="shares">Total Member Shares (Ksh):</label>
@@ -76,12 +78,7 @@
     </div>
 
     <label for="months">Payment Period (Months):</label>
-    <select id="months">
-      <option value="3">3</option>
-      <option value="6">6</option>
-      <option value="9">9</option>
-      <option value="12" selected>12</option>
-    </select>
+    <input type="number" id="months" placeholder="Enter number of months (max 12)">
 
     <button onclick="calculateLoan()">Calculate</button>
 
@@ -89,32 +86,31 @@
   </div>
 
   <script>
-    const modeRadios = document.querySelectorAll('input[name="mode"]');
-    const sharesDiv = document.getElementById('sharesInput');
-    const loanDiv = document.getElementById('loanInput');
-
-    modeRadios.forEach(radio => {
-      radio.addEventListener('change', () => {
-        if (radio.value === 'shares') {
-          sharesDiv.style.display = 'block';
-          loanDiv.style.display = 'none';
-        } else {
-          sharesDiv.style.display = 'none';
-          loanDiv.style.display = 'block';
-        }
-      });
-    });
+    function toggleMode() {
+      const mode = document.getElementById("mode").value;
+      document.getElementById("sharesInput").style.display = (mode === "shares") ? "block" : "none";
+      document.getElementById("loanInput").style.display = (mode === "loan") ? "block" : "none";
+    }
 
     function calculateLoan() {
-      const mode = document.querySelector('input[name="mode"]:checked').value;
-      const months = parseInt(document.getElementById('months').value);
-      let shares = parseFloat(document.getElementById('shares').value) || 0;
-      let loan = parseFloat(document.getElementById('loanAmount').value) || 0;
+      const mode = document.getElementById("mode").value;
+      const months = parseInt(document.getElementById("months").value);
+      let shares = parseFloat(document.getElementById("shares").value) || 0;
+      let loan = parseFloat(document.getElementById("loanAmount").value) || 0;
+
+      if (isNaN(months) || months <= 0 || months > 12) {
+        alert("Please enter a valid payment period (1–12 months).");
+        return;
+      }
 
       if (mode === 'shares') {
+        if (shares <= 0) {
+          alert("Please enter valid shares.");
+          return;
+        }
         loan = shares * 3;
       } else {
-        if (loan === 0) {
+        if (loan <= 0) {
           alert("Please enter a valid loan amount.");
           return;
         }
@@ -124,14 +120,9 @@
         }
       }
 
-      if (loan <= 0) {
-        alert("Please provide shares or loan amount.");
-        return;
-      }
-
       const processingFee = loan * 0.02;
       const totalInterest = loan * 0.01 * months;
-      const totalPayable = loan + totalInterest;
+      const totalPayable = loan;
       const monthlyPayment = totalPayable / months;
       const amountDisbursed = loan - processingFee - totalInterest;
 
