@@ -50,7 +50,7 @@
       let fee = loan * 0.02;
       let interest = loan * 0.01 * months;
       let disbursed = loan - (fee + interest);
-      let total = loan + interest;
+      let total = loan;
       let monthly = total / months;
 
       document.getElementById('resultBox').style.display = "block";
